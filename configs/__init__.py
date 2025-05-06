@@ -1,12 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from .database import DatabaseConfiguration
+from .services import ServicesConfiguration
 
 
 class ProjectConfiguration(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FEEDBACK_")
 
     # * Вложенные группы настроек
-    models: DatabaseConfiguration = DatabaseConfiguration()
+    services: ServicesConfiguration = ServicesConfiguration()
 
     # * Опциональные переменные
     DEBUG_MODE: bool = True
