@@ -13,9 +13,6 @@ async def get_transcription_reference(text_id: UUID) -> str:
     Args:
         text_id (UUID): Идентификатор текста.
 
-    Raises:
-        HTTPException: Проксирует ошибки с сервиса service-texts.
-
     Returns:
         str: Эталонная фонетическая запись.
     """

@@ -1,49 +1,10 @@
 import json
 from enum import Enum
 from typing import Literal, TypeAlias
-from typing import Self
 
 PhoneticError: TypeAlias = dict[str, int | str]
 Feedback: TypeAlias = dict[str, float | list[PhoneticError]] | str
 DPTable: TypeAlias = list[list[int]] | None
-
-
-class PronunciationAssessment(Enum):
-    """Список возможных оценок произношения."""
-
-    CORRECT = "Correct"
-    SATISFACTORY = "Satisfactory"
-    BAD = "Bad"
-    INCORRECT = "Incorrect"
-
-    @classmethod
-    def get(cls, percent: int) -> Self:
-        """Функция возвращает экземпляр оценки произношения в
-        зависисмости от точности произношения.
-
-        Args:
-            percent (int): Процент точности произношения.
-
-        Raises:
-            ValueError: Некорректное значение процента.
-
-        Returns:
-            Self: Экземпляр оценки произношения.
-        """
-        if not 0 <= percent <= 100:
-            raise ValueError("Incorrect percentage accuracy value")
-
-        if percent >= 90:
-            return cls.EXCELLENT
-
-        elif percent >= 80:
-            return cls.SATISFACTORY
-
-        elif percent >= 70:
-            return cls.BAD
-
-        else:
-            return cls.INCORRECT
 
 
 class CompareType(Enum):
@@ -255,13 +216,14 @@ class PronunciationEvaluator:
 
     def compare(self, format_: Literal["dict", "json"] = "dict") -> Feedback:
         """Производит сравнение эталонной и фактичнской фонетической записи, возвращает
-        полный отчёт
+        полный отчёт.
 
         Args:
-            format_ (Literal[&quot;dict&quot;, &quot;json&quot;], optional): _description_. Defaults to "dict".
+            format_ (Literal["dict", "json"], optional): Формат возвращаемых данных.
+                Defaults to "dict".
 
         Returns:
-            Feedback: _description_
+            Feedback: Отчет по произношению.
         """
         seq_alignment = self.aligner.get_align()
         self._check_errors(seq_alignment)
@@ -272,7 +234,6 @@ class PronunciationEvaluator:
         feedback = {
             "accuracy": accuracy,
             "errors": self.errors,
-            "assesment": PronunciationAssessment.get(accuracy).value,
         }
 
         return feedback if format_ == "dict" else json.dumps(feedback)
