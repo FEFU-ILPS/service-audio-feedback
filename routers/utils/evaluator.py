@@ -9,6 +9,8 @@ DPTable: TypeAlias = list[list[int]] | None
 
 
 class PronunciationAssessment(Enum):
+    """Список возможных оценок произношения."""
+
     CORRECT = "Correct"
     SATISFACTORY = "Satisfactory"
     BAD = "Bad"
@@ -16,6 +18,18 @@ class PronunciationAssessment(Enum):
 
     @classmethod
     def get(cls, percent: int) -> Self:
+        """Функция возвращает экземпляр оценки произношения в
+        зависисмости от точности произношения.
+
+        Args:
+            percent (int): Процент точности произношения.
+
+        Raises:
+            ValueError: Некорректное значение процента.
+
+        Returns:
+            Self: Экземпляр оценки произношения.
+        """
         if not 0 <= percent <= 100:
             raise ValueError("Incorrect percentage accuracy value")
 
