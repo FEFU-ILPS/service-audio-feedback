@@ -15,7 +15,7 @@ class ServiceConfiguration(BaseSettings):
 
 
 def get_service_configuration(service_name: str) -> ServiceConfiguration:
-    env_namespace = f"MANAGER_SERVICE_{service_name.upper()}_"
+    env_namespace = f"FEEDBACK_SERVICE_{service_name.upper()}_"
 
     class SpecificServiceConfiguration(ServiceConfiguration):
         model_config = SettingsConfigDict(env_prefix=env_namespace)
