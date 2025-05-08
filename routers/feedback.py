@@ -16,7 +16,7 @@ router = APIRouter()
 async def create_feedback(data: Annotated[FeedbackRequest, Body(...)]) -> FeedbackResponse:
     """Создает отчет по произношению и возвращает его в качестве ответа."""
 
-    reference = get_transcription_reference(data.text_id)
+    reference = await get_transcription_reference(data.text_id)
 
     evaluator = PronunciationEvaluator(
         reference=reference,
