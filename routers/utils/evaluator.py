@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from typing import Literal, TypeAlias
 
-PhoneticError: TypeAlias = dict[str, int | str]
+PhoneticError: TypeAlias = dict[str, int | str | None]
 Feedback: TypeAlias = dict[str, float | list[PhoneticError]] | str
 DPTable: TypeAlias = list[list[int]] | None
 

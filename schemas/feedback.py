@@ -16,4 +16,4 @@ class FeedbackResponse(BaseModel):
     """Данные, отправляемые после формирования отчёта по произношению."""
 
     accuracy: float = Field(description="Точность произношения", ge=0, le=100)
-    errors: list[dict[str, int | str]] = Field(description="Ошибки произношенияю")
+    errors: list[dict[str, int | str | None]] = Field(description="Ошибки произношенияю")
