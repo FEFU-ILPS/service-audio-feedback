@@ -11,10 +11,8 @@ COPY ./pyproject.toml .
 
 RUN poetry install --only main --no-interaction --no-ansi --no-root
 
-COPY ./alembic.ini .
-
 COPY . .
 
 EXPOSE 8064
 
-CMD ["sh", "-c", "alembic upgrade head && python start.py"]
+CMD ["python", "start.py"]
