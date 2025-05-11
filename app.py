@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from routers import health_router, feedback_router
+
+from routers import feedback_router, health_router
 
 
 @asynccontextmanager

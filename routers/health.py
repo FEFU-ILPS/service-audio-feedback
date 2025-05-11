@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
+import datetime
 import platform
 import socket
-import datetime
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/health")
 

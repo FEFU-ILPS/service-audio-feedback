@@ -1,8 +1,6 @@
 from typing import Annotated
 
-
 from fastapi import APIRouter, Body
-
 
 from schemas.feedback import FeedbackRequest, FeedbackResponse
 
