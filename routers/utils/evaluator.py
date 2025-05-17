@@ -167,7 +167,7 @@ class PronunciationEvaluator:
         """
         self.reference: list[str] = reference.split()
         self.actual: list[str] = actual.split()
-        self.errors: list[PhoneticError] = []
+        self.mistakes: list[PhoneticError] = []
         self.aligner = SequenceAligner(self.reference, self.actual)
 
     def _construct_error(self, ref_pos: int, act_pos: int, cmp_type: CompareType) -> PhoneticError:
@@ -189,7 +189,7 @@ class PronunciationEvaluator:
             "type": cmp_type.value,
         }
 
-    def _check_errors(self, sequences_aligment: list[CompareType]) -> None:
+    def _check_mistakes(self, sequences_aligment: list[CompareType]) -> None:
         """Выполняет проверку на ошибки произношения, используя вектор сдвига фонетических записей.
 
         Args:
@@ -201,7 +201,7 @@ class PronunciationEvaluator:
         for compare_type in sequences_aligment:
             if compare_type != CompareType.MATCH:
                 error = self._construct_error(ref_pos, act_pos, compare_type)
-                self.errors.append(error)
+                self.mistakes.append(error)
 
             match compare_type:
                 case CompareType.MATCH | CompareType.REPLACEMENT:
@@ -226,14 +226,14 @@ class PronunciationEvaluator:
             Feedback: Отчет по произношению.
         """
         seq_alignment = self.aligner.get_align()
-        self._check_errors(seq_alignment)
+        self._check_mistakes(seq_alignment)
 
-        correct = len(self.reference) - len(self.errors)
+        correct = len(self.reference) - len(self.mistakes)
 
         accuracy = round((correct / len(self.reference)) * 100 if self.actual else 0.0, 2)
         feedback = {
             "accuracy": accuracy,
-            "errors": self.errors,
+            "mistakes": self.mistakes,
         }
 
         return feedback if format_ == "dict" else json.dumps(feedback)
