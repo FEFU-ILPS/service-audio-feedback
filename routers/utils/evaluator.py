@@ -2,8 +2,8 @@ import json
 from enum import Enum
 from typing import Literal, TypeAlias
 
-PhoneticError: TypeAlias = dict[str, int | str | None]
-Feedback: TypeAlias = dict[str, float | list[PhoneticError]] | str
+PhoneticMistake: TypeAlias = dict[str, int | str | None]
+Feedback: TypeAlias = dict[str, float | list[PhoneticMistake]] | str
 DPTable: TypeAlias = list[list[int]] | None
 
 
@@ -167,10 +167,12 @@ class PronunciationEvaluator:
         """
         self.reference: list[str] = reference.split()
         self.actual: list[str] = actual.split()
-        self.mistakes: list[PhoneticError] = []
+        self.mistakes: list[PhoneticMistake] = []
         self.aligner = SequenceAligner(self.reference, self.actual)
 
-    def _construct_error(self, ref_pos: int, act_pos: int, cmp_type: CompareType) -> PhoneticError:
+    def _construct_error(
+        self, ref_pos: int, act_pos: int, cmp_type: CompareType
+    ) -> PhoneticMistake:
         """Формирует ошибку на основе текущей позиции символа и типа
         операции сравнения в вектори сдвига.
 
