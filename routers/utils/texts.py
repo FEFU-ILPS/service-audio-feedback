@@ -1,9 +1,7 @@
 from uuid import UUID
 
-import httpx
-from fastapi import HTTPException
-
 from configs import configs
+from .http_proxy import proxy_request
 
 
 async def get_transcription_reference(text_id: UUID) -> str:
@@ -16,16 +14,8 @@ async def get_transcription_reference(text_id: UUID) -> str:
     Returns:
         str: Эталонная фонетическая запись.
     """
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{configs.services.texts.URL}/{text_id}")
+    async with proxy_request(configs.services.texts.URL) as client:
+        response = await client.get(f"/{text_id}")
+        response.raise_for_status()
 
-            response.raise_for_status()
-
-            return response.json()["transcription"]
-
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.json().get("detail", "Unknown error"),
-            )
+        return response.json()["transcription"]
