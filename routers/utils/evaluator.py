@@ -2,6 +2,8 @@ import json
 from enum import Enum
 from typing import Literal, TypeAlias
 
+from service_logging import logger
+
 PhoneticMistake: TypeAlias = dict[str, int | str | None]
 Feedback: TypeAlias = dict[str, float | list[PhoneticMistake]] | str
 DPTable: TypeAlias = list[list[int]] | None
@@ -227,11 +229,15 @@ class PronunciationEvaluator:
         Returns:
             Feedback: Отчет по произношению.
         """
+        logger.info("Creating a shift vector for alignment...")
         seq_alignment = self.aligner.get_align()
+
+        logger.info("Mistakes detection...")
         self._check_mistakes(seq_alignment)
 
         correct = len(self.reference) - len(self.mistakes)
 
+        logger.info("Counting accuracy...")
         accuracy = round((correct / len(self.reference)) * 100 if self.actual else 0.0, 2)
         feedback = {
             "accuracy": accuracy,
