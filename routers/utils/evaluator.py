@@ -236,6 +236,7 @@ class PronunciationEvaluator:
         self._check_mistakes(seq_alignment)
 
         correct = len(self.reference) - len(self.mistakes)
+        correct = 0 if correct < 0 else correct
 
         logger.info("Counting accuracy...")
         accuracy = round((correct / len(self.reference)) * 100 if self.actual else 0.0, 2)
