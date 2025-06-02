@@ -239,9 +239,9 @@ class PronunciationEvaluator:
         correct = 0 if correct < 0 else correct
 
         logger.info("Counting accuracy...")
-        accuracy = round((correct / len(self.reference)) * 100 if self.actual else 0.0, 2)
+        accuracy = (correct / len(self.reference)) * 100 if self.actual else 0.0
         feedback = {
-            "accuracy": accuracy,
+            "accuracy": round(accuracy, 2),
             "mistakes": self.mistakes,
         }
 
