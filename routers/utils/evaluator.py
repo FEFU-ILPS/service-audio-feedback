@@ -1,12 +1,10 @@
 import json
 from enum import Enum
-from typing import Literal, TypeAlias
+from typing import Literal, TypedDict
 
 from service_logging import logger
 
-PhoneticMistake: TypeAlias = dict[str, int | str | None]
-Feedback: TypeAlias = dict[str, float | list[PhoneticMistake]] | str
-DPTable: TypeAlias = list[list[int]] | None
+type DPTable = list[list[int]]
 
 
 class CompareType(Enum):
@@ -18,11 +16,37 @@ class CompareType(Enum):
     MATCH = "Match"
 
 
+class Phoneme(TypedDict):
+    """Представление единичной фонемы из фонетической записи."""
+
+    position: int
+    value: str
+
+
+class PhoneticMistake(TypedDict):
+    """Представление фонетической ошибки при сравнении
+    эталонной и фактической записи.
+    """
+
+    reference: Phoneme | None
+    actual: Phoneme | None
+    type: CompareType
+
+
+class Feedback(TypedDict):
+    """Представление отчёта по произношению."""
+
+    reference: str
+    actual: str
+    accuracy: float
+    mistakes: list[PhoneticMistake]
+
+
 class SequenceAligner:
-    """Класс находящий сдвиг двух последовательностей по алгоритму Нидлмана-Вунша."""
+    """Класс выравнивания двух последовательностей по алгоритму Нидлмана-Вунша."""
 
     def __init__(self, reference: str, actual: str):
-        """Инициализация класса поиска сдвига.
+        """Инициализация класса поиска выравнивания.
 
         Args:
             reference (str): Эталонная строка.
@@ -35,16 +59,18 @@ class SequenceAligner:
         self.dimension_y = 0
 
     def get_align(self) -> list[CompareType]:
-        """Получает результирующий сдвиг между эталонной и фактической
+        """Получает результирующее выравнивание между эталонной и фактической
         строкой.
 
-        Сдвигом называется разница между символами двух сравниваемых строк.
+        Выравниванием называется разница между символами двух сравниваемых строк.
         Разница между символами - это некий результат сравнения соответствующих
         позиций в строке, который дает понять, был ли символ заменён, удалён или
-        вставлен туда, где его быть не должно.
+        вставлен туда, где его быть не должно. Т.е. выравнивание - это множество,
+        отвечающее на вопрос "какую последовательность операций нужно совершить,
+        чтобы привести эталон к сравниваемой строке кратчайшим путём?".
 
         Returns:
-            list[CompareType]: Вектор сдвига (Список операция сравнения).
+            list[CompareType]: Вектор операций выравнивания.
         """
         self.dimension_x, self.dimension_y = len(self.reference), len(self.actual)
 
@@ -86,13 +112,14 @@ class SequenceAligner:
                 dpt[i][j] = min(match, delete, insert)
 
     def _traceback_alignment(self, dp: DPTable) -> list[CompareType]:
-        """Выполняет обратный проход по таблице ДП для получения последовательности операций сравнения.
+        """Выполняет обратный проход по таблице ДП для получения
+        последовательности операций выравнивания.
 
         Args:
             dp (DPTable): Заполненная таблица ДП.
 
         Returns:
-            list[CompareType]: Вектор сдвига (Список операция сравнения).
+            list[CompareType]: Вектор операций выравнивания.
         """
         alignment: list[CompareType] = []
         i, j = self.dimension_x, self.dimension_y
@@ -176,28 +203,35 @@ class PronunciationEvaluator:
         self, ref_pos: int, act_pos: int, cmp_type: CompareType
     ) -> PhoneticMistake:
         """Формирует ошибку на основе текущей позиции символа и типа
-        операции сравнения в вектори сдвига.
+        операции выравнивания в векторе операций выравнивания.
 
         Args:
             ref_pos (int): Позиция символа в эталонной записи.
             act_pos (int): Позиция символа в фактической записи.
-            cmp_type (CompareType): Тип сравнительной операции.
+            cmp_type (CompareType): Тип операции выравнивания.
 
         Returns:
             PhoneticError: Ошибка произношения фонемы.
         """
-        return {
-            "position": act_pos * 2,  # Для компенсации исключения пробелов при сравнении.
-            "reference": self.reference[ref_pos] if cmp_type != CompareType.INSERTION else None,
-            "actual": self.actual[act_pos] if cmp_type != CompareType.DELETION else None,
-            "type": cmp_type.value,
-        }
+        return PhoneticMistake(
+            reference=Phoneme(position=ref_pos, value=self.reference[ref_pos])
+            if cmp_type != CompareType.INSERTION
+            else None,
+            actual=Phoneme(position=act_pos, value=self.actual[act_pos])
+            if cmp_type != CompareType.DELETION
+            else None,
+            type=cmp_type.value,
+        )
 
     def _check_mistakes(self, sequences_aligment: list[CompareType]) -> None:
-        """Выполняет проверку на ошибки произношения, используя вектор сдвига фонетических записей.
+        """Выполняет проверку на ошибки произношения,
+        используя вектор выравнивания фонетических записей.
+
+        Наличие операции выравнивания, отличной от "Совпадение", явялется
+        фонетической ошибкой.
 
         Args:
-            sequences_aligment (list[CompareType]): Вектор сдвига (Список операция сравнения).
+            sequences_aligment (list[CompareType]): Вектор операций выравнивания.
         """
         ref_pos = 0
         act_pos = 0
@@ -218,8 +252,8 @@ class PronunciationEvaluator:
                 case CompareType.INSERTION:
                     act_pos += 1
 
-    def compare(self, format_: Literal["dict", "json"] = "dict") -> Feedback:
-        """Производит сравнение эталонной и фактичнской фонетической записи, возвращает
+    def compare(self, format_: Literal["dict", "json"] = "dict") -> Feedback | str:
+        """Производит сравнение эталонной и фактической фонетической записи, возвращает
         полный отчёт.
 
         Args:
@@ -227,7 +261,7 @@ class PronunciationEvaluator:
                 Defaults to "dict".
 
         Returns:
-            Feedback: Отчет по произношению.
+            Feedback | str: Отчет по произношению.
         """
         logger.info("Creating a shift vector for alignment...")
         seq_alignment = self.aligner.get_align()
@@ -240,9 +274,12 @@ class PronunciationEvaluator:
 
         logger.info("Counting accuracy...")
         accuracy = (correct / len(self.reference)) * 100 if self.actual else 0.0
-        feedback = {
-            "accuracy": round(accuracy, 2),
-            "mistakes": self.mistakes,
-        }
+
+        feedback = Feedback(
+            refrences=self.reference,
+            actual=self.actual,
+            accuracy=round(accuracy, 2),
+            mistakes=self.mistakes,
+        )
 
         return feedback if format_ == "dict" else json.dumps(feedback)
