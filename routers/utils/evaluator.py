@@ -170,6 +170,7 @@ class PronunciationEvaluator:
         self.reference: list[str] = reference.split()
         self.actual: list[str] = actual.split()
         self.mistakes: list[PhoneticMistake] = []
+        self.matches: int = 0
         self.aligner = SequenceAligner(self.reference, self.actual)
 
     def _construct_error(
@@ -207,6 +208,9 @@ class PronunciationEvaluator:
                 error = self._construct_error(ref_pos, act_pos, compare_type)
                 self.mistakes.append(error)
 
+            else:
+                self.matches += 1
+
             match compare_type:
                 case CompareType.MATCH | CompareType.REPLACEMENT:
                     ref_pos += 1
@@ -217,6 +221,20 @@ class PronunciationEvaluator:
 
                 case CompareType.INSERTION:
                     act_pos += 1
+
+    def _сalculate_accuracy(self) -> float:
+        """Метод высчитывает точность произношения путём вычисления отношения разницы
+        длин эталона и фактического результата с длиной эталона (a) и отношения количества
+        правильных символов к макимальной длине эталона или фактического результата (b).
+        После чего возвращается результат, равный разнице отношений b и a.
+
+        Returns:
+            float: Точность произношения.
+        """
+        fine = 1 + abs(len(self.reference) - len(self.actual)) / len(self.reference)
+        accuracy = self.matches / max(len(self.reference) * fine, len(self.actual)) * 100
+
+        return round(accuracy, 2)
 
     def compare(self, format_: Literal["dict", "json"] = "dict") -> Feedback:
         """Производит сравнение эталонной и фактичнской фонетической записи, возвращает
@@ -235,13 +253,11 @@ class PronunciationEvaluator:
         logger.info("Mistakes detection...")
         self._check_mistakes(seq_alignment)
 
-        correct = len(self.reference) - len(self.mistakes)
-        correct = 0 if correct < 0 else correct
+        logger.info("Calculating accuracy...")
+        accuracy = self._сalculate_accuracy()
 
-        logger.info("Counting accuracy...")
-        accuracy = (correct / len(self.reference)) * 100 if self.actual else 0.0
         feedback = {
-            "accuracy": round(accuracy, 2),
+            "accuracy": accuracy,
             "mistakes": self.mistakes,
         }
 
