@@ -187,7 +187,7 @@ class PronunciationEvaluator:
             PhoneticError: Ошибка произношения фонемы.
         """
         return {
-            "position": ref_pos,
+            "position": act_pos * 2,  # Для компенсации исключения пробелов при сравнении.
             "reference": self.reference[ref_pos] if cmp_type != CompareType.INSERTION else None,
             "actual": self.actual[act_pos] if cmp_type != CompareType.DELETION else None,
             "type": cmp_type.value,
