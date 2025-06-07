@@ -223,16 +223,14 @@ class PronunciationEvaluator:
                     act_pos += 1
 
     def _сalculate_accuracy(self) -> float:
-        """Метод высчитывает точность произношения путём вычисления отношения разницы
-        длин эталона и фактического результата с длиной эталона (a) и отношения количества
-        правильных символов к макимальной длине эталона или фактического результата (b).
-        После чего возвращается результат, равный разнице отношений b и a.
+        """Метод высчитывает точность произношения, путём учета штрафа за отличие
+        длины фактического результата от длины эталона.
 
         Returns:
             float: Точность произношения.
         """
         fine = 1 + abs(len(self.reference) - len(self.actual)) / len(self.reference)
-        accuracy = self.matches / max(len(self.reference) * fine, len(self.actual)) * 100
+        accuracy = self.matches / (len(self.reference) * fine) * 100
 
         return round(accuracy, 2)
 
