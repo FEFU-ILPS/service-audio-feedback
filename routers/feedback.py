@@ -24,7 +24,7 @@ async def create_feedback(data: Annotated[FeedbackRequest, Body(...)]) -> Feedba
     )
     feedback = evaluator.compare()
 
-    item = FeedbackResponse(**feedback)
+    item = FeedbackResponse.model_validate(feedback)
     logger.success(f"Detected {len(item.mistakes)} mistakes. Total accuracy {item.accuracy}")
 
     return item
