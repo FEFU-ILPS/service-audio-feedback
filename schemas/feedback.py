@@ -1,18 +1,10 @@
-from typing import TypedDict
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from .examples import ID_EXAMPLES, RESULT_EXAMPLES, ACCURACY_EXAMPLES, MISTAKES_EXAMPLES
+from routers.utils.evaluator import PhoneticMistake
 
-
-class PhoneticMistake(TypedDict):
-    """Типизированный словарь для описания фонетической ошибки пользователя."""
-
-    position: int
-    reference: str | None
-    actual: str | None
-    type: str
+from .examples import ACCURACY_EXAMPLES, ID_EXAMPLES, MISTAKES_EXAMPLES, RESULT_EXAMPLES
 
 
 class FeedbackRequest(BaseModel):

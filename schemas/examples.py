@@ -17,12 +17,40 @@ ACCURACY_EXAMPLES = [
 
 MISTAKES_EXAMPLES = [
     [
-        {"position": 6, "reference": "ɔːɹ", "actual": "oʊ", "type": "Replacement"},
-        {"position": 14, "reference": "n", "actual": None, "type": "Deletion"},
-        {"position": 18, "reference": "z", "actual": "s", "type": "Replacement"},
-        {"position": 20, "reference": "w", "actual": None, "type": "Deletion"},
-        {"position": 21, "reference": "ɑː", "actual": "oʊ", "type": "Replacement"},
-        {"position": 28, "reference": "l", "actual": None, "type": "Deletion"},
-        {"position": 30, "reference": "ɪɹ", "actual": "iː", "type": "Replacement"},
+        {
+            "reference": {"position": 6, "value": "ɔːɹ"},
+            "actual": {"position": 6, "value": "oʊ"},
+            "type": "replacement",
+        },
+        {
+            "reference": {"position": 14, "value": "n"},
+            "actual": None,
+            "type": "deletion",
+        },
+        {
+            "reference": {"position": 18, "value": "z"},
+            "actual": {"position": 18, "value": "s"},
+            "type": "replacement",
+        },
+        {
+            "reference": {"position": 20, "value": "w"},
+            "actual": None,
+            "type": "deletion",
+        },
+        {
+            "reference": {"position": 21, "value": "ɑː"},
+            "actual": {"position": 21, "value": "oʊ"},
+            "type": "replacement",
+        },
+        {
+            "reference": {"position": 28, "value": "l"},
+            "actual": None,
+            "type": "deletion",
+        },
+        {
+            "reference": {"position": 30, "value": "ɪɹ"},
+            "actual": {"position": 30, "value": "iː"},
+            "type": "replacement",
+        },
     ]
 ]

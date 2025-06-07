@@ -36,8 +36,6 @@ class PhoneticMistake(TypedDict):
 class Feedback(TypedDict):
     """Представление отчёта по произношению."""
 
-    reference: str
-    actual: str
     accuracy: float
     mistakes: list[PhoneticMistake]
 
@@ -289,8 +287,6 @@ class PronunciationEvaluator:
         accuracy = self._сalculate_accuracy()
 
         feedback = Feedback(
-            refrences=self.reference,
-            actual=self.actual,
             accuracy=accuracy,
             mistakes=self.mistakes,
         )
